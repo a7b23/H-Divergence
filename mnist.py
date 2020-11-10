@@ -23,7 +23,7 @@ parser.add_argument('--n', type=int, default=100)
 parser.add_argument('--seed', type=int, default=1)
 parser.add_argument('--log_dir', type=str, default='logs')
 parser.add_argument('--data_dir', type=str, default='./data')
-parser.add_argument('--runs', type=int, default=1)
+parser.add_argument('--runs', type=int, default=2)
 args = parser.parse_args()
 
 np.random.seed(args.seed)
