@@ -1,5 +1,43 @@
 # H-Divergence
 
+### Blob
+Power Results
+```
+python blob.py --exptype power
+```
+TypeI Error Results
+```
+python blob.py --exptype typei
+```
+V-JS Results
+```
+python blob.py --vtype vjs
+```
+V-Min Results
+```
+python blob.py --vtype vmin
+```
+More arguments please check the help
+
+### HDGM
+Power Results
+```
+python hdgm.py --exptype power
+```
+TypeI Error Results
+```
+python hdgm.py --exptype typei
+```
+V-JS Results
+```
+python hdgm.py --vtype vjs
+```
+V-Min Results
+```
+python hdgm.py --vtype vmin
+```
+More arguments please check the help
+
 ### MNIST
 
 Get the fake MNIST data from here - https://drive.google.com/file/d/13JpGbp7PEm4PfZ6VeqpFiy0lHfVpy5Z5/view
