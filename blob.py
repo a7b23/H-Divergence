@@ -12,7 +12,7 @@ The original github repo is https://github.com/fengliu90/DK-for-TST, please also
 """
 import numpy as np
 from sklearn.utils import check_random_state
-from utils_clean import JSV_Gaussian
+from utils import JSV_Gaussian
 import argparse
 import os
 
