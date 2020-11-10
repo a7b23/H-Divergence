@@ -14,7 +14,7 @@ import numpy as np
 import torch
 import argparse
 parser = argparse.ArgumentParser()
-from utils_clean import JSV_Gaussian
+from utils import JSV_Gaussian
 import os
 
 # parameters to generate data
