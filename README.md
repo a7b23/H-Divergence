@@ -17,7 +17,9 @@ V-Min Results
 ```
 python blob.py --vtype vmin
 ```
-More arguments please check the help
+More arguments please check the help.
+
+To replicate the results from the paper, choose vmin for power and vjs for typeI experiment.
 
 ### HDGM
 Power Results
@@ -36,7 +38,9 @@ V-Min Results
 ```
 python hdgm.py --vtype vmin
 ```
-More arguments please check the help
+More arguments please check the help.
+
+To replicate the results from the paper, choose vjs for both power and typeI experiment.
 
 ### MNIST
 
