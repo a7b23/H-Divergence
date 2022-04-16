@@ -2,7 +2,7 @@ import numpy as np
 from sklearn.mixture import GaussianMixture
 
 def JSV_Gaussian_u(Fea, len_s, n_components, vtype):
-    """compute value of deep-kernel MMD and std of deep-kernel MMD using merged data."""
+    """compute one v-div with GMM value"""
     X = Fea[0:len_s, :] # fetch the sample 1
     Y = Fea[len_s:, :] # fetch the sample 2
     ind = np.random.choice(Fea.shape[0], len_s, replace=False)
@@ -31,7 +31,7 @@ def JSV_Gaussian_u(Fea, len_s, n_components, vtype):
     return jsv
 
 def JSV_Gaussian(Fea, N_per, N1, alpha, n_components, dtype, vtype):
-    """run two-sample test (TST) using ordinary Gaussian kernel."""
+    """run permutation test with v-div with GMM"""
     jsv_vector = np.zeros(N_per)
     jsv_value = JSV_Gaussian_u(Fea, N1, n_components, vtype)
     count = 0

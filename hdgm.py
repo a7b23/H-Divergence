@@ -30,7 +30,7 @@ args = parser.parse_args()
 np.random.seed(1102)
 # Setup for experiments
 dtype = np.float
-N_per = 200 # permutation times
+N_per = 100 # permutation times
 alpha = 0.05 # test threshold
 d = args.d # dimension of data
 n = args.n # number of samples in per mode
