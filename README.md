@@ -1,5 +1,7 @@
 # H-Divergence
 
+***Important Notice: This repo is still under construction and many things here are out of date.***
+
 ### Blob
 Power Results
 ```
