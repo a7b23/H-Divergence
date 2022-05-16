@@ -5,13 +5,11 @@
 ### Blob
 
 ```
-python blob.py
+python blob_kde.py
 ```
 More arguments please check the help.
 
-To replicate the results for alpha = 0.05 from the paper, choose --vtype = vmin.
-
-To perform the hyperparameter search, run the previous script directly.
+To replicate the results for alpha = 0.05 from the paper, choose --vtype = vmin or run the previous script directly.
 
 ### HDGM
 
