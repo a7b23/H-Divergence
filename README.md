@@ -16,7 +16,7 @@ To perform the full hyperparameter search, run the previous script directly.
 ### HDGM
 
 ```
-python hdgm.py --exptype power --vtype vmin
+python hdgm.py --exptype power --vtype vjs
 ```
 More arguments please check the help.
 
