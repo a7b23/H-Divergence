@@ -12,17 +12,22 @@ The original github repo is https://github.com/fengliu90/DK-for-TST, please also
 """
 import numpy as np
 from sklearn.utils import check_random_state
-from utils import JSV_Gaussian
+from utils import JSV_KDE
 import argparse
 import os
+import sys
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import KernelDensity
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--ncomp', type=int, default=10, help="number of components in the GMM (default: 10)")
+parser.add_argument('--kernel', type=str, default="gaussian", help="kernel for KDE (default: gaussian)")
+parser.add_argument('--bandwidth', type=float, default=0.05, help="bandwidth for KDE (default: 0.05)")
 parser.add_argument('--ntrial', type=int, default=10, help="number of trials (default: 10)")
 parser.add_argument('--exptype', type=str, default="power", help="type of experiment (power or typei) (default: power)")
-parser.add_argument('--vtype', type=str, default="vjs", help="type of experiment (vjs or vmin) (default: vjs)")
-parser.add_argument('--output', type=str, default=".", help="output directory (default: current directory)")
+parser.add_argument('--vtype', type=str, default="", help="type of experiment (vjs or vmin) (default: vmin)")
+parser.add_argument('--output', type=str, default="./Results", help="output directory (default: current directory)")
 args = parser.parse_args()
+
 
 def sample_blobs(n, rows=3, cols=3, sep=1, rs=None):
     """Generate Blob-S for testing type-I error."""
@@ -72,7 +77,6 @@ n_list = [10,20,40,50,70,80,90,100] # number of samples in per mode
 K = args.ntrial # number of trials
 N = 100 # # number of test sets
 N_f = 100.0 # number of test sets (float)
-n_components = args.ncomp
 # Generate variance and co-variance matrix of Q
 sigma_mx_2_standard = np.array([[0.03, 0], [0, 0.03]])
 sigma_mx_2 = np.zeros([9,2,2])
@@ -95,6 +99,64 @@ for n in n_list:
     Results = np.zeros([1, K])
     # Repeat experiments K times (K = 10) and report average test power/typeI error
     for kk in range(K):
+        # Generate Blob-D
+        bandwidth = []
+        np.random.seed(seed=112 * kk + 1 + n)
+        if args.exptype == "power":
+            s1,s2 = sample_blobs_Q(N1, sigma_mx_2)
+        elif args.exptype == "typei":
+            s1,s2 = sample_blobs(N1) # for validating type-I error (s1 ans s2 are from the same distribution)
+        else:
+            raise NotImplementedError("Please choose either power or typei experiment")
+        S = np.concatenate((s1, s2), axis=0)
+        # Train
+        np.random.seed(seed=1102)
+        # print("Searching S1")
+        grid = GridSearchCV(KernelDensity(),{'bandwidth': np.linspace(0.01, 1.0, 30)},cv=10) # 20-fold cross-validation
+        grid.fit(s1)
+        # print(grid.best_score_, grid.best_params_["bandwidth"])
+        bandwidth.append(grid.best_params_["bandwidth"])
+        # print("Searching S2")
+        grid = GridSearchCV(KernelDensity(),{'bandwidth': np.linspace(0.01, 1.0, 30)},cv=10) # 20-fold cross-validation
+        grid.fit(s2)
+        # print(grid.best_score_, grid.best_params_["bandwidth"])
+        bandwidth.append(grid.best_params_["bandwidth"])
+        # print("Searching S")
+        grid = GridSearchCV(KernelDensity(),{'bandwidth': np.linspace(0.01, 1.0, 30)},cv=10) # 20-fold cross-validation
+        grid.fit(S)
+        # print(grid.best_score_, grid.best_params_["bandwidth"])
+        bandwidth.append(grid.best_params_["bandwidth"])
+        if args.vtype:
+            vtype = args.vtype
+        else:
+            vjs_count = 0
+            vmin_count = 0
+            for idx in range(10):
+                N1_sub = N1//30*29
+                s1_sub = s1[np.random.choice(s1.shape[0], N1_sub, replace=False)]
+                s2_sub = s2[np.random.choice(s2.shape[0], N1_sub, replace=False)]
+                S_sub = np.concatenate((s1_sub, s2_sub), axis=0)
+                h_vjs, _, _ = JSV_KDE(S_sub, 40, N1_sub, alpha, bandwidth, dtype, "vjs")
+                h_vmin, _, _ = JSV_KDE(S_sub, 40, N1_sub, alpha, bandwidth, dtype, "vmin")
+                vjs_count += h_vjs
+                vmin_count += h_vmin
+                # print("vjs", vjs_count, "vmin", vmin_count)
+            if args.exptype == "power":
+                if vjs_count > vmin_count:
+                    vtype = "vjs"
+                else:
+                    vtype = "vmin"
+            elif args.exptype == "typei":
+                if vjs_count > vmin_count:
+                    vtype = "vmin"
+                else:
+                    vtype = "vjs"
+            else:
+                raise NotImplementedError("Please choose either power or typei experiment")
+            print("Chosen vtype:", vtype)
+
+
+
         # Compute test power/typeI error
         H_u = np.zeros(N)
         T_u = np.zeros(N)
@@ -112,17 +174,15 @@ for n in n_list:
 
             S = np.concatenate((s1, s2), axis=0)
             # Run two sample test on generated data
-            h_u, threshold_u, jsv_u = JSV_Gaussian(S, N_per, N1, alpha, n_components, dtype, args.vtype)
+            h_u, threshold_u, jsv_u = JSV_KDE(S, N_per, N1, alpha, bandwidth, dtype, vtype)
             # Gather results
             count_u = count_u + h_u
-            # if k % 10 == 0:
-            #     print(n, k, "JSV Gaussian:", count_u)
             H_u[k] = h_u
             T_u[k] = threshold_u
             M_u[k] = jsv_u
         # Print test power of MMD-D
-        print("n =",str(n),"--- Test Power of V-Div GMM on Blob: ", H_u.sum()/N_f)
+        print("n =",str(n),"--- Test Power of V-Div KDE on Blob: ", H_u.sum()/N_f)
         Results[0, kk] = H_u.sum() / N_f
-        print("n =",str(n),"--- Test Power of V-Div GMM on Blob (K times): ",Results[0])
-        print("n =",str(n),"--- Average Test Power of V-Div GMM on Blob: ",Results[0].sum()/(kk+1))
-    np.save(os.path.join(args.output, f"Blob_{args.exptype}_{n}_ncomp{n_components}_{args.vtype}_GMM"),Results)
+        print("n =",str(n),f"--- Test Power of V-Div KDE on Blob ({K} times): ",Results[0])
+        print("n =",str(n),"--- Average Test Power of V-Div KDE on Blob: ",Results[0].sum()/(kk+1))
+    np.save(os.path.join(args.output, f"Blob_{args.exptype}_{n}_gaussian_{args.vtype}_KDE"),Results)
