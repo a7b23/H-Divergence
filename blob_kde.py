@@ -24,7 +24,7 @@ parser.add_argument('--kernel', type=str, default="gaussian", help="kernel for K
 parser.add_argument('--bandwidth', type=float, default=0.05, help="bandwidth for KDE (default: 0.05)")
 parser.add_argument('--ntrial', type=int, default=10, help="number of trials (default: 10)")
 parser.add_argument('--exptype', type=str, default="power", help="type of experiment (power or typei) (default: power)")
-parser.add_argument('--vtype', type=str, default="", help="type of experiment (vjs or vmin) (default: vmin)")
+parser.add_argument('--vtype', type=str, default="vmin", help="type of experiment (vjs or vmin) (default: vmin)")
 parser.add_argument('--output', type=str, default="./Results", help="output directory (default: current directory)")
 args = parser.parse_args()
 
@@ -126,37 +126,7 @@ for n in n_list:
         grid.fit(S)
         # print(grid.best_score_, grid.best_params_["bandwidth"])
         bandwidth.append(grid.best_params_["bandwidth"])
-        if args.vtype:
-            vtype = args.vtype
-        else:
-            vjs_count = 0
-            vmin_count = 0
-            for idx in range(10):
-                N1_sub = N1//30*29
-                s1_sub = s1[np.random.choice(s1.shape[0], N1_sub, replace=False)]
-                s2_sub = s2[np.random.choice(s2.shape[0], N1_sub, replace=False)]
-                S_sub = np.concatenate((s1_sub, s2_sub), axis=0)
-                h_vjs, _, _ = JSV_KDE(S_sub, 40, N1_sub, alpha, bandwidth, dtype, "vjs")
-                h_vmin, _, _ = JSV_KDE(S_sub, 40, N1_sub, alpha, bandwidth, dtype, "vmin")
-                vjs_count += h_vjs
-                vmin_count += h_vmin
-                # print("vjs", vjs_count, "vmin", vmin_count)
-            if args.exptype == "power":
-                if vjs_count > vmin_count:
-                    vtype = "vjs"
-                else:
-                    vtype = "vmin"
-            elif args.exptype == "typei":
-                if vjs_count > vmin_count:
-                    vtype = "vmin"
-                else:
-                    vtype = "vjs"
-            else:
-                raise NotImplementedError("Please choose either power or typei experiment")
-            print("Chosen vtype:", vtype)
-
-
-
+       
         # Compute test power/typeI error
         H_u = np.zeros(N)
         T_u = np.zeros(N)
@@ -174,7 +144,7 @@ for n in n_list:
 
             S = np.concatenate((s1, s2), axis=0)
             # Run two sample test on generated data
-            h_u, threshold_u, jsv_u = JSV_KDE(S, N_per, N1, alpha, bandwidth, dtype, vtype)
+            h_u, threshold_u, jsv_u = JSV_KDE(S, N_per, N1, alpha, bandwidth, dtype, args.vtype)
             # Gather results
             count_u = count_u + h_u
             H_u[k] = h_u
