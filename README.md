@@ -8,7 +8,9 @@ python blob.py
 ```
 More arguments please check the help.
 
-To replicate the results from the paper, you can run the previous script or choose --vtype = vmin directly
+To replicate the results from the paper, choose --vtype = vmin.
+
+To perform the full hyperparameter search, run the previous script directly.
 
 ### HDGM
 Power Results
