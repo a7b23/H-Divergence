@@ -9,9 +9,9 @@ python blob.py
 ```
 More arguments please check the help.
 
-To replicate the results from the paper, choose --vtype = vmin.
+To replicate the results for alpha = 0.05 from the paper, choose --vtype = vmin.
 
-To perform the full hyperparameter search, run the previous script directly.
+To perform the hyperparameter search, run the previous script directly.
 
 ### HDGM
 
@@ -20,7 +20,7 @@ python hdgm.py --exptype power --vtype vjs
 ```
 More arguments please check the help.
 
-To replicate the results from the paper, choose --n = 100,1000,1500,2500, and --d = 3,5,10,15,20
+To replicate the results from the paper, choose --vtype = vjs, --n = 100,1000,1500,2500, and --d = 3,5,10,15,20
 
 ### HIGGS
 
